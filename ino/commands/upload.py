@@ -6,12 +6,18 @@ import os.path
 import subprocess
 import platform
 
+import RPi.GPIO as GPIO
+
 from time import sleep
 from serial import Serial
 from serial.serialutil import SerialException
 
 from ino.commands.base import Command
 from ino.exc import Abort
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(7,GPIO.OUT)
+GPIO.output(7,1)
 
 
 class Upload(Command):
@@ -72,10 +78,13 @@ class Upload(Command):
             s = Serial(port, 115200)
         except SerialException as e:
             raise Abort(str(e))
-        s.setDTR(False)
-        sleep(0.1)
+		s.setDTR(False)
+        GPIO.output(7,1)
+        sleep(0.3)
         s.setDTR(True)
+        GPIO.output(7,0)
         s.close()
+
 
         # Need to do a little dance for Leonardo and derivatives:
         # open then close the port at the magic baudrate (usually 1200 bps) first
